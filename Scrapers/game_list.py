@@ -3,15 +3,20 @@
 # Import packages
 import requests # 2.32.5
 import pandas as pd #2.4.2
+import os
+from dotenv import load_dotenv
 
-# Insert API key
-API_KEY = "YOUR API KEY HERE"
+
+# Insert API key and endpoint from config.env
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
+ENDPOINT = os.getenv("APP_ID_LIST_ENDPOINT")
 
 # Function to get and return games list
 def get_steam_game_list(api_key: str):
-    endpoint = "https://api.steampowered.com/IStoreService/GetAppList/v1/"
+    endpoint = ENDPOINT
     params = {
-        "key": api_key
+        "key": API_KEY
     }
 
     # Try to connect to the endpoint
