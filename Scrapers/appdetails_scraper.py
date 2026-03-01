@@ -1,4 +1,4 @@
-# 
+# Used to get all specified data from the details endpoint -> https://store.steampowered.com/api/appdetails?appids={}&cc=us
 
 # Import packages
 import os
@@ -35,36 +35,18 @@ def fetch_app_json(endpoint: str, app_id: str):
         print(f"Request failed: {e}")
         return None
 
-# Used by all scraper functions to return data to a specified folder and file name
-def run_scraper(func, endpoint, sample_ids, output_file, sleep_secs: float = 1.5):
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
-
-    # Read procssed IDs of output file if exists to not re-process
-    if os.path.exists(output_file):
-        collected_df = pd.read_csv(output_file)
-        processed_ids = set(collected_df["steam_appid"])
-    else:
-        processed_ids = set()
-
-    collected = []
-    
-    for app_id in sample_ids:
-        if app_id in processed_ids:
-            continue
-        time.sleep(sleep_secs)
-        df = func(endpoint, str(app_id))
-        if df is not None:
-            df.to_csv(output_file, mode="a", header=not os.path.exists(output_file), index=False)
-            collected.append(df)
-            processed_ids.add(app_id)
-    if collected:
-        return pd.concat(collected, ignore_index=True)
-    return pd.DataFrame()
-
 # --------------------------------------------------------------------------- Game List ---------------------------------------------------------------------------
 
 # Used to get the steam game list from the API connection
-def get_steam_game_list(api_key: str):
+def get_steam_game_list(api_key: str, cache_file: str = "Scrapers/games-list-2.csv"):
+    # Check cache file first
+    if os.path.exists(cache_file):
+        try:
+            return pd.read_csv(cache_file)
+        except Exception as e:
+            print(f"Failed to read cache file {cache_file}: {e}")
+    
+    # Cache miss or unreadable; fetch from API
     params = {"key": api_key}
     try:
         response = requests.get(GAME_LIST_ENDPOINT, params=params)
@@ -76,12 +58,16 @@ def get_steam_game_list(api_key: str):
             names.append(i["name"])
             last_mods.append(i["last_modified"])
             price_changes.append(i["price_change_number"])
-        return pd.DataFrame({
+        df = pd.DataFrame({
             "appid": appids,
             "name": names,
             "last_modified": last_mods,
             "price_change_number": price_changes,
         })
+        # Save to cache for future runs
+        os.makedirs(os.path.dirname(cache_file), exist_ok=True)
+        df.to_csv(cache_file, index=False)
+        return df
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
         return None
@@ -347,19 +333,13 @@ def get_genres(endpoint, app_id: str):
 
 
 def main():
-    # Get game list and write file
-    games_list = get_steam_game_list(API_KEY)
+    # Get game list (reads from cache if exists, fetches API only on cache miss)
+    games_list = get_steam_game_list(API_KEY, "Scrapers/games-list-2.csv")
     if games_list is not None:
-        games_list.to_csv("Scrapers/games-list.csv", index=False)
         appids = games_list["appid"].tolist()
     else:
-        # Try to read existing list
-        try:
-            df = pd.read_csv("Scrapers/games-list.csv")
-            appids = df["appid"].tolist()
-        except Exception:
-            print("Unable to obtain app IDs; aborting")
-            return
+        print("Unable to obtain app IDs")
+        return
 
     # For each app id, run each scraper once (in tandem)
     scrapers = [
@@ -385,15 +365,22 @@ def main():
         else:
             processed[name] = set()
 
+    # Get set of already-processed app IDs from the first scraper (details)
+    first_scraper_name = scrapers[0][0] if scrapers else None
+    already_processed = processed.get(first_scraper_name, set())
+    
+    # Filter appids to only those not yet processed; resume where scraper left off
+    unprocessed_appids = [str(app_id) for app_id in appids if str(app_id) not in already_processed]
+    print(f"Resuming from app ID index (already processed: {len(already_processed)}, remaining: {len(unprocessed_appids)})")
+
     # For each app id, call each scraper once (skip if already processed)
-    for app_id in appids:
-        sid = str(app_id)
+    for sid in unprocessed_appids:
+        # Rate limiting
+        time.sleep(1.5)
         for name, _func, out_file in scrapers:
             if sid in processed.get(name, set()):
                 continue
 
-            # Rate limiting
-            time.sleep(1.5)
             try:
                 df = _func(DETAIL_ENDPOINT, sid)
             except Exception as e:
@@ -403,7 +390,7 @@ def main():
             if df is not None and not df.empty:
                 df.to_csv(out_file, mode="a", header=not os.path.exists(out_file), index=False)
                 processed[name].add(sid)
-                print(f"{app_id} {name} processed")
+                print(f"{sid} {name} processed")
 
     print("All scrapers finished.")
 
