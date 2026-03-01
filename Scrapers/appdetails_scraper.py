@@ -17,7 +17,23 @@ API_KEY = os.getenv("API_KEY")
 GAME_LIST_ENDPOINT = os.getenv("APP_ID_LIST_ENDPOINT")
 DETAIL_ENDPOINT = os.getenv("APP_DETAIL_ENDPOINT")
 
-# --------------------------------------------------------------------------- Helper ---------------------------------------------------------------------------
+# --------------------------------------------------------------------------- Helpers ---------------------------------------------------------------------------
+# In-memory cache for fetched app JSON responses
+_app_json_cache = {}
+
+def fetch_app_json(endpoint: str, app_id: str):
+    key = endpoint.format(app_id)
+    if key in _app_json_cache:
+        return _app_json_cache[key]
+    try:
+        response = requests.get(key)
+        response.raise_for_status()
+        data = response.json()
+        _app_json_cache[key] = data
+        return data
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+        return None
 
 # Used by all scraper functions to return data to a specified folder and file name
 def run_scraper(func, endpoint, sample_ids, output_file, sleep_secs: float = 1.5):
@@ -90,9 +106,9 @@ class Details(BaseModel):
 # Used to get game metadata details
 def get_details(endpoint, app_id: str):
     try:
-        response = requests.get(endpoint.format(app_id))
-        response.raise_for_status()
-        details_data = response.json()
+        details_data = fetch_app_json(endpoint, app_id)
+        if details_data is None:
+            return None
         app_data = details_data.get(str(app_id))
         if app_data and app_data.get("success") and "data" in app_data:
             details = Details.model_validate(app_data["data"])
@@ -110,8 +126,8 @@ def get_details(endpoint, app_id: str):
             "website": details.website,
             "collection_date": details.collection_date,
         }])
-    except requests.exceptions.RequestException as e:
-        print(f"Request failed: {e}")
+    except Exception as e:
+        print(f"Error parsing details for {app_id}: {e}")
         return None
 
 # --------------------------------------------------------------------------- price overview section ---------------------------------------------------------------------------
@@ -131,9 +147,9 @@ class PriceOverview(BaseModel):
 # Used to get the prices of each game
 def get_price_overview(endpoint, app_id: str):
     try:
-        response = requests.get(endpoint.format(app_id))
-        response.raise_for_status()
-        details_data = response.json()
+        details_data = fetch_app_json(endpoint, app_id)
+        if details_data is None:
+            return None
         raw = details_data[str(app_id)]["data"].get("price_overview")
         if raw is None:
             return pd.DataFrame()
@@ -151,8 +167,8 @@ def get_price_overview(endpoint, app_id: str):
                 "collection_date": details.collection_date,
             })
         return pd.DataFrame(rows)
-    except requests.exceptions.RequestException as e:
-        print(f"Request failed: {e}")
+    except Exception as e:
+        print(f"Error parsing price overview for {app_id}: {e}")
         return None
 
 # --------------------------------------------------------------------------- developers/publishers section ---------------------------------------------------------------------------
@@ -168,9 +184,9 @@ class Devs(BaseModel):
 # Used to get data about the developers of the games
 def get_devs(endpoint, app_id: str):
     try:
-        response = requests.get(endpoint.format(app_id))
-        response.raise_for_status()
-        details_data = response.json()
+        details_data = fetch_app_json(endpoint, app_id)
+        if details_data is None:
+            return None
         raw = details_data[str(app_id)]["data"]
         devs = raw.get("developers") or []
         devs = devs if isinstance(devs, list) else [devs]
@@ -186,8 +202,8 @@ def get_devs(endpoint, app_id: str):
                     "collection_date": validated.collection_date,
                 })
         return pd.DataFrame(rows)
-    except requests.exceptions.RequestException as e:
-        print(f"Request failed: {e}")
+    except Exception as e:
+        print(f"Error parsing developers for {app_id}: {e}")
         return None
 
 # Create Publishers class
@@ -200,9 +216,9 @@ class Pubs(BaseModel):
 # Used to get data about the publishers of the games
 def get_pubs(endpoint, app_id: str):
     try:
-        response = requests.get(endpoint.format(app_id))
-        response.raise_for_status()
-        details_data = response.json()
+        details_data = fetch_app_json(endpoint, app_id)
+        if details_data is None:
+            return None
         raw = details_data[str(app_id)]["data"]
         pubs = raw.get("publishers") or []
         pubs = pubs if isinstance(pubs, list) else [pubs]
@@ -218,8 +234,8 @@ def get_pubs(endpoint, app_id: str):
                 "collection_date": validated.collection_date,
             })
         return pd.DataFrame(rows)
-    except requests.exceptions.RequestException as e:
-        print(f"Request failed: {e}")
+    except Exception as e:
+        print(f"Error parsing publishers for {app_id}: {e}")
         return None
 
 # --------------------------------------------------------------------------- categories section ---------------------------------------------------------------------------
@@ -235,9 +251,9 @@ class Category(BaseModel):
 # Used to get categories for each game
 def get_categories(endpoint, app_id: str):
     try:
-        response = requests.get(endpoint.format(app_id))
-        response.raise_for_status()
-        details_data = response.json()
+        details_data = fetch_app_json(endpoint, app_id)
+        if details_data is None:
+            return None
         raw = details_data[str(app_id)]["data"].get("categories")
         if raw is None:
             return pd.DataFrame()
@@ -252,8 +268,8 @@ def get_categories(endpoint, app_id: str):
                 "collection_date": details.collection_date,
             })
         return pd.DataFrame(rows)
-    except requests.exceptions.RequestException as e:
-        print(f"Request failed: {e}")
+    except Exception as e:
+        print(f"Error parsing categories for {app_id}: {e}")
         return None
 
 # --------------------------------------------------------------------------- DLC section ---------------------------------------------------------------------------
@@ -270,9 +286,9 @@ class DLC(BaseModel):
 # Stored as a list, need to process out
 def get_dlcs(endpoint, app_id: str):
     try:
-        response = requests.get(endpoint.format(app_id))
-        response.raise_for_status()
-        details_data = response.json()
+        details_data = fetch_app_json(endpoint, app_id)
+        if details_data is None:
+            return None
         raw = details_data[str(app_id)]["data"].get("dlc")
         if not raw:
             return pd.DataFrame()
@@ -289,8 +305,8 @@ def get_dlcs(endpoint, app_id: str):
                 "collection_date": validated.collection_date,
             })
         return pd.DataFrame(rows)
-    except requests.exceptions.RequestException as e:
-        print(f"Request failed: {e}")
+    except Exception as e:
+        print(f"Error parsing dlcs for {app_id}: {e}")
         return None
 
 # --------------------------------------------------------------------------- genres section ---------------------------------------------------------------------------
@@ -308,9 +324,9 @@ class Genre(BaseModel):
 # Stored as a list of dicts, need to process out
 def get_genres(endpoint, app_id: str):
     try:
-        response = requests.get(endpoint.format(app_id))
-        response.raise_for_status()
-        details_data = response.json()
+        details_data = fetch_app_json(endpoint, app_id)
+        if details_data is None:
+            return None
         raw = details_data[str(app_id)]["data"].get("genres")
         if raw is None:
             return pd.DataFrame()
@@ -325,8 +341,8 @@ def get_genres(endpoint, app_id: str):
                 "collection_date": details.collection_date,
             })
         return pd.DataFrame(rows)
-    except requests.exceptions.RequestException as e:
-        print(f"Request failed: {e}")
+    except Exception as e:
+        print(f"Error parsing genres for {app_id}: {e}")
         return None
 
 
@@ -387,6 +403,7 @@ def main():
             if df is not None and not df.empty:
                 df.to_csv(out_file, mode="a", header=not os.path.exists(out_file), index=False)
                 processed[name].add(sid)
+                print(f"{app_id} {name} processed")
 
     print("All scrapers finished.")
 
