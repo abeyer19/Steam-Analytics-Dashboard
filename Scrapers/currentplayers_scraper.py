@@ -79,7 +79,6 @@ def get_steam_game_list(api_key: str, cache_file: str = "Scrapers/games-list.csv
 class Players(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
-    steam_appid: int
     player_count: Optional[int] = 0
     collection_date: datetime = datetime.now()
 
@@ -145,7 +144,7 @@ def main():
                 continue
 
             try:
-                df = _func(DETAIL_ENDPOINT, sid)
+                df = _func(PlAYER_COUNT_ENDPOINT, sid)
             except Exception as e:
                 print(f"Error running {name} for {sid}: {e}")
                 df = None
