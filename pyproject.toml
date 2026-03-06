@@ -1,0 +1,25 @@
+[project]
+name = "Steam-Analytics-Dashboard"
+version = "1.0.0"
+dependencies = [
+    "os",
+    "time",
+    "datetime",
+    "dataclasses",
+    "typing",
+    "requests",
+    "pandas",
+    "dotenv",
+    "pydantic"
+]
+requires-python = ">=3.14"
+authors = [
+    {name = "Andrew Beyer"},
+    {name = "Chinmay Patel"},
+    {name = "Lauren Willig"},
+    {name = "Aldila Yunus"},
+    {name = "Marwan Al Shoubaki"}
+]
+
+[project.urls]
+Respository = ""
