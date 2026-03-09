@@ -16,11 +16,11 @@ Once cloned, either open the folder where to project has been cloned in your IDE
 
 
 #### Bash - Install Dependencies:
-> a. Install dependencies.
+> a. Install dependencies without the ability to make changes to current code.
 ```Bash
-pip install .
+python3 -m pip install .
 ```
 > b. Install dependencies in editable mode for development.
 ```Bash
-pip install -e .
+python3 -m pip install -e .
 ```
