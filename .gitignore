@@ -1,1 +1,16 @@
+# --- Private Configuration ---
+config.env
 
+# --- Python Junk ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+
+# --- Operating System Files ---
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
