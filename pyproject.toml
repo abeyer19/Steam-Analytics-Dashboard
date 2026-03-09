@@ -1,6 +1,7 @@
 [project]
 name = "Steam-Analytics-Dashboard"
 version = "1.0.0"
+readme = "README.md"
 dependencies = [
     "pandas >= 3.0.1",
     "pydantic >= 2.12.5",
@@ -16,5 +17,9 @@ authors = [
     {name = "Marwan Al Shoubaki"}
 ]
 
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project.urls]
-Respository = ""
+Respository = "https://github.com"
