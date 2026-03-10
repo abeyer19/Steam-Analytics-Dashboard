@@ -38,7 +38,7 @@ def fetch_app_json(endpoint: str, app_id: str):
 # --------------------------------------------------------------------------- Game List ---------------------------------------------------------------------------
 
 # Used to get the steam game list from the API connection
-def get_steam_game_list(api_key: str, cache_file: str = "Scrapers/games-list-2.csv"):
+def get_steam_game_list(api_key: str, cache_file: str = "Scrapers/games-list.csv"):
     # Check cache file first
     if os.path.exists(cache_file):
         try:
@@ -334,7 +334,7 @@ def get_genres(endpoint, app_id: str):
 
 def main():
     # Get game list (reads from cache if exists, fetches API only on cache miss)
-    games_list = get_steam_game_list(API_KEY, "Scrapers/games-list-2.csv")
+    games_list = get_steam_game_list(API_KEY, "Scrapers/games-list.csv")
     if games_list is not None:
         appids = games_list["appid"].tolist()
     else:
