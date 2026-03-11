@@ -23,13 +23,13 @@ _app_json_cache = {}
 
 def fetch_app_json(endpoint: str, app_id: str):
     key = endpoint.format(app_id)
-    if key in _app_json_cache:
-        return _app_json_cache[key]
+    if app_id in _app_json_cache:
+        return _app_json_cache[app_id]
     try:
         response = requests.get(key)
         response.raise_for_status()
         data = response.json()
-        _app_json_cache[key] = data
+        _app_json_cache[app_id] = data
         return data
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
@@ -79,7 +79,6 @@ def get_steam_game_list(api_key: str, cache_file: str = "Scrapers/games-list.csv
 class ReviewSummary(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
-    steam_appid: int
     num_reviews: int = 0
     review_score: int = 0
     review_score_desc: str
@@ -138,7 +137,7 @@ class TopReviews(BaseModel):
     votes_funny: Optional[int] = 0
     weighted_vote_score: Optional[float] = 0.0
     comment_count: Optional[int] = 0
-    steam_purchase: Optional[str] = None
+    steam_purchase: Optional[bool] = None
     received_for_free: Optional[bool] = None
     refunded: Optional[bool] = None
     written_during_early_access: Optional[bool] = None
@@ -223,8 +222,8 @@ def main():
 
     # For each app id, run each scraper once (in tandem)
     scrapers = [
-        ("reviews_sum", get_reviews_summary, "Scrapers/steam_data/reviews_summary_data.csv"),
-        ("reviews_top", get_top_reviews, "Scrapers/steam_data/top_reviews_data.csv")
+        ("reviews_sum", get_reviews_summary, "Scrapers/steam_data_reviews/reviews_summary_data.csv"),
+        ("reviews_top", get_top_reviews, "Scrapers/steam_data_reviews/top_reviews_data.csv")
     ]
 
     # Prepare processed-id sets per scraper for resumability
@@ -266,6 +265,10 @@ def main():
                 df.to_csv(out_file, mode="a", header=not os.path.exists(out_file), index=False)
                 processed[name].add(sid)
                 print(f"{sid} {name} processed")
+
+        if sid in _app_json_cache:
+            _app_json_cache.pop(sid)
+            print(_app_json_cache)
 
     print("All scrapers finished.")
 
