@@ -25,13 +25,13 @@ _app_json_cache = {}
 
 def fetch_app_json(endpoint: str, app_id: str):
     key = endpoint.format(app_id)
-    if key in _app_json_cache:
-        return _app_json_cache[key]
+    if app_id in _app_json_cache:
+        return _app_json_cache[app_id]
     try:
         response = requests.get(key)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, "html.parser")
-        _app_json_cache[key] = soup
+        _app_json_cache[app_id] = soup
         return soup
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
@@ -163,6 +163,9 @@ def main():
                 df.to_csv(out_file, mode="a", header=not os.path.exists(out_file), index=False)
                 processed[name].add(sid)
                 print(f"{sid} {name} processed")
+
+        if sid in _app_json_cache:
+            _app_json_cache.pop(sid)
 
     print("All scrapers finished.")
 
