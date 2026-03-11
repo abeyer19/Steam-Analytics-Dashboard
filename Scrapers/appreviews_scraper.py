@@ -268,7 +268,6 @@ def main():
 
         if sid in _app_json_cache:
             _app_json_cache.pop(sid)
-            print(_app_json_cache)
 
     print("All scrapers finished.")
 
