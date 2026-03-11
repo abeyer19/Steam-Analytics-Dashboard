@@ -18,18 +18,18 @@ GAME_LIST_ENDPOINT = os.getenv("APP_ID_LIST_ENDPOINT")
 DETAIL_ENDPOINT = os.getenv("APP_DETAIL_ENDPOINT")
 
 # --------------------------------------------------------------------------- Helpers ---------------------------------------------------------------------------
-# In-memory cache for fetched app JSON responses
+# In-memory cache for fetched app JSON responses, limiting repeats for each get function
 _app_json_cache = {}
 
 def fetch_app_json(endpoint: str, app_id: str):
     key = endpoint.format(app_id)
-    if key in _app_json_cache:
-        return _app_json_cache[key]
+    if app_id in _app_json_cache:
+        return _app_json_cache[app_id]
     try:
         response = requests.get(key)
         response.raise_for_status()
         data = response.json()
-        _app_json_cache[key] = data
+        _app_json_cache[app_id] = data
         return data
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
@@ -343,13 +343,13 @@ def main():
 
     # For each app id, run each scraper once (in tandem)
     scrapers = [
-        ("details", get_details, "Scrapers/steam_data/details_data.csv"),
-        ("price", get_price_overview, "Scrapers/steam_data/price_data.csv"),
-        ("devs", get_devs, "Scrapers/steam_data/devs_data.csv"),
-        ("pubs", get_pubs, "Scrapers/steam_data/pubs_data.csv"),
-        ("categories", get_categories, "Scrapers/steam_data/categories_data.csv"),
-        ("dlc", get_dlcs, "Scrapers/steam_data/dlc_data.csv"),
-        ("genres", get_genres, "Scrapers/steam_data/genres_data.csv"),
+        ("details", get_details, "Scrapers/steam_data_details/details_data.csv"),
+        ("price", get_price_overview, "Scrapers/team_data_details/price_data.csv"),
+        ("devs", get_devs, "Scrapers/team_data_details/devs_data.csv"),
+        ("pubs", get_pubs, "Scrapers/team_data_details/pubs_data.csv"),
+        ("categories", get_categories, "Scrapers/team_data_details/categories_data.csv"),
+        ("dlc", get_dlcs, "Scrapers/team_data_details/dlc_data.csv"),
+        ("genres", get_genres, "Scrapers/team_data_details/genres_data.csv"),
     ]
 
     # Prepare processed-id sets per scraper for resumability
@@ -391,6 +391,9 @@ def main():
                 df.to_csv(out_file, mode="a", header=not os.path.exists(out_file), index=False)
                 processed[name].add(sid)
                 print(f"{sid} {name} processed")
+
+        if sid in _app_json_cache:
+            _app_json_cache.pop(sid)
 
     print("All scrapers finished.")
 
