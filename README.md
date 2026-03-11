@@ -1,19 +1,22 @@
 # DVA-Project
-Repo for DVA Project SP26 Team 40
+Repository for DVA Project SP26 Team 40
 
 # ℹ️ Description
-This project is a part of a semester long team collaboration effort for Georgia Tech's CSE6242 course in the OMSA program, Spring semester 2026. 
-Our goal is to create value for game developers, studios, and independent researchers for the world’s largest video game hosting platform through a user-friendly interactive dashboard.
+This project is a part of a semester long team collaboration effort for Georgia Tech's CSE6242 course in the OMSA program, Spring semester 2026.
+
+Our mission is to empower game developers, studios, and independent researchers within the world’s largest video game hosting platform by bridging the gap between academic research and analytics with a user-friendly interactive dashboard.
+
+Using free and open-source software, we are able to collect mass amounts of data using [Steam](https://store.steampowered.com/) ([Valve Corporation](https://www.valvesoftware.com/en/)) storefront endpoints and official APIs about the platforms 200K+ App IDs.
 
 # 💾 Installation
 ### 0. Prerequesites
 - Python 3.14+ required.
 - CLI (*Command Line Iterface*)
 
-### 1. Cloning the repopistory.
+### 1. Cloning the repository
 #### Clone Repository:
 ```Bash
-git clone https://github.com/GITHUB-USER/DVA-Project
+git clone https://github.com/USER/DVA-Project
 ```
 \
 Once cloned, either open the cloned repo in your IDE of choice or change directories to the respective path in your CLI and download depedencies.
@@ -31,3 +34,8 @@ python3 -m pip install -e .
 ```
 
 # 🚀 Execution
+### 0. Code Demo's
+
+### 1. Algorithm Implementations
+
+### 2. Dashboard Demo's
