@@ -115,102 +115,6 @@ def get_reviews_summary(endpoint, app_id: str):
         print(f"Error parsing reviews for {app_id}: {e}")
         return None
 
-# --------------------------------------------------------------------------- Top Reviews data ---------------------------------------------------------------------------
-
-# Create Top Reviews dataclass
-@dataclass
-class TopReviews(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-
-    steam_appid: int
-    recommendationid: str
-    num_games_owned: Optional[int] = 0
-    num_reviews: Optional[int] = 0
-    playtime_forever: Optional[int] = 0
-    playtime_last_two_weeks: Optional[int] = 0
-    playtime_at_review: Optional[int] = 0
-    last_played: Optional[int] = 0
-    language: Optional[str] = None
-    review: Optional[str] = None
-    voted_up: Optional[bool] = None
-    votes_up: Optional[int] = 0
-    votes_funny: Optional[int] = 0
-    weighted_vote_score: Optional[float] = 0.0
-    comment_count: Optional[int] = 0
-    steam_purchase: Optional[bool] = None
-    received_for_free: Optional[bool] = None
-    refunded: Optional[bool] = None
-    written_during_early_access: Optional[bool] = None
-    app_release_date: Optional[str] = None
-    collection_date: datetime = datetime.now()
-
-# Used to get the top reviews on the summary page of each app ID
-def get_top_reviews(endpoint, app_id: str):
-    try:
-        reviews_data = fetch_app_json(endpoint, app_id)
-        if reviews_data is None:
-            return None
-        reviews_list = reviews_data.get("reviews", [])
-        if not reviews_list:
-            return pd.DataFrame()
-        rows = []
-        for review in reviews_list:
-            try:
-                author = review.get("author", {})
-                top_review = TopReviews.model_validate({
-                    "steam_appid": app_id,
-                    "recommendationid": review.get("recommendationid"),
-                    "num_games_owned": author.get("num_games_owned"),
-                    "num_reviews": author.get("num_reviews"),
-                    "playtime_forever": author.get("playtime_forever"),
-                    "playtime_last_two_weeks": author.get("playtime_last_two_weeks"),
-                    "playtime_at_review": author.get("playtime_at_review"),
-                    "last_played": author.get("last_played"),
-                    "language": review.get("language"),
-                    "review": review.get("review"),
-                    "voted_up": review.get("voted_up"),
-                    "votes_up": review.get("votes_up"),
-                    "votes_funny": review.get("votes_funny"),
-                    "weighted_vote_score": review.get("weighted_vote_score"),
-                    "comment_count": review.get("comment_count"),
-                    "steam_purchase": review.get("steam_purchase"),
-                    "received_for_free": review.get("received_for_free"),
-                    "refunded": review.get("refunded"),
-                    "written_during_early_access": review.get("written_during_early_access"),
-                    "app_release_date": review.get("app_release_date"),
-                    "collection_date": datetime.now(),
-                })
-                rows.append({
-                    "steam_appid": top_review.steam_appid,
-                    "recommendationid": top_review.recommendationid,
-                    "num_games_owned": top_review.num_games_owned,
-                    "num_reviews": top_review.num_reviews,
-                    "playtime_forever": top_review.playtime_forever,
-                    "playtime_last_two_weeks": top_review.playtime_last_two_weeks,
-                    "playtime_at_review": top_review.playtime_at_review,
-                    "last_played": top_review.last_played,
-                    "language": top_review.language,
-                    "review": top_review.review,
-                    "voted_up": top_review.voted_up,
-                    "votes_up": top_review.votes_up,
-                    "votes_funny": top_review.votes_funny,
-                    "weighted_vote_score": top_review.weighted_vote_score,
-                    "comment_count": top_review.comment_count,
-                    "steam_purchase": top_review.steam_purchase,
-                    "received_for_free": top_review.received_for_free,
-                    "refunded": top_review.refunded,
-                    "written_during_early_access": top_review.written_during_early_access,
-                    "app_release_date": top_review.app_release_date,
-                    "collection_date": top_review.collection_date,
-                })
-            except Exception as e:
-                print(f"Error parsing review {review.get('recommendationid')}: {e}")
-                continue
-        return pd.DataFrame(rows) if rows else pd.DataFrame()
-    except Exception as e:
-        print(f"Error parsing top reviews for {app_id}: {e}")
-        return None
-
 def main():
     # Get game list (reads from cache if exists, fetches API only on cache miss)
     games_list = get_steam_game_list(API_KEY, "Scrapers/games-list.csv")
@@ -222,8 +126,7 @@ def main():
 
     # For each app id, run each scraper once (in tandem)
     scrapers = [
-        ("reviews_sum", get_reviews_summary, "Scrapers/steam_data_reviews/reviews_summary_data.csv"),
-        ("reviews_top", get_top_reviews, "Scrapers/steam_data_reviews/top_reviews_data.csv")
+        ("reviews_sum", get_reviews_summary, "Scrapers/steam_data_reviews/reviews_summary_data.csv")
     ]
 
     # Prepare processed-id sets per scraper for resumability
@@ -268,6 +171,7 @@ def main():
 
         if sid in _app_json_cache:
             _app_json_cache.pop(sid)
+            print(_app_json_cache)
 
     print("All scrapers finished.")
 
