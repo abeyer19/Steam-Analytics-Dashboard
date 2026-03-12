@@ -9,7 +9,7 @@ from typing import Optional
 import requests
 import pandas as pd
 from dotenv import load_dotenv
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 # Insert API key and endpoint for game list, and endpoint for game details
 load_dotenv("config.env")
@@ -81,6 +81,7 @@ class Details(BaseModel):
 
     steam_appid: int
     name: str = "Unknown"
+    app_type: str = Field(default="Unknown", alias="type")
     is_free: bool = False
     controller_support: str = "Unknown"
     about_the_game: str = ""
@@ -104,6 +105,7 @@ def get_details(endpoint, app_id: str):
         return pd.DataFrame([{
             "steam_appid": details.steam_appid,
             "name": details.name,
+            "type": details.app_type,
             "is_free": details.is_free,
             "controller_support": details.controller_support,
             "about_the_game": details.about_the_game,
