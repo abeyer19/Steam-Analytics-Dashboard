@@ -4,9 +4,9 @@ Repository for DVA Project SP26 Team 40
 # ℹ️ Description
 This project is a part of a semester long team collaboration effort for Georgia Tech's CSE6242 course in the OMSA program, Spring semester 2026.
 
-Our mission is to empower game developers, studios, and independent researchers within the world’s largest video game hosting platform by bridging the gap between academic research and analytics with a user-friendly interactive dashboard.
+Our mission is to empower developers, game studios, and researchers on the world’s largest gaming platform by bridging the gap between academic research and actionable analytics through an intuitive, interactive dashboard.
 
-Using free and open-source software, we are able to collect mass amounts of data using [Steam](https://store.steampowered.com/) ([Valve Corporation](https://www.valvesoftware.com/en/)) storefront endpoints and official APIs about the platforms 200K+ App IDs.
+Using free and open-source software, we are able to collect mass amounts of data using [Steam](https://store.steampowered.com/) storefront endpoints and official APIs about the platforms 200K+ App IDs and 100K+ Games. All data collection, tranformations, algorithmic implementations, and visualizations are engineered and maintained by our team while ensuring reproducibility.
 
 # 💾 Installation
 ### 0. Prerequesites
