@@ -1,180 +1,214 @@
-# Used to get all specified data from the reviews endpoint -> https://store.steampowered.com/appreviews/{}?json=1&filter=summary
-
-# Import packages
 import os
 import time
-from datetime import datetime
-from dataclasses import dataclass
-from typing import Optional
+import random
+from datetime import datetime, timezone
 import requests
 import pandas as pd
 from dotenv import load_dotenv
-from pydantic import BaseModel, ConfigDict
 
-# Insert API key and endpoint for game list, and endpoint for game details
 load_dotenv("config.env")
+
 API_KEY = os.getenv("API_KEY")
-GAME_LIST_ENDPOINT = os.getenv("APP_ID_LIST_ENDPOINT")
-REVIEWS_ENDPOINT = os.getenv("APP_REVIEWS_ENDPOINT")
+APP_ID_LIST_ENDPOINT = os.getenv("APP_ID_LIST_ENDPOINT")      
+APP_DETAILS_ENDPOINT = os.getenv("APP_DETAILS_ENDPOINT")      
+APP_REVIEWS_ENDPOINT = os.getenv("APP_REVIEWS_ENDPOINT")     
 
-# --------------------------------------------------------------------------- Helpers ---------------------------------------------------------------------------
-# In-memory cache for fetched app JSON responses, limiting repeats for each get function
-_app_json_cache = {}
+OUT_DIR = "Scrapers/steam_data"
+GAMES_LIST_CACHE = "Scrapers/games-list.csv"
+REVIEWS_SUMMARY_CSV = os.path.join(OUT_DIR, "reviews_summary_games.csv")
+FAILED_LOG = os.path.join(OUT_DIR, "failed_requests.log")
 
-def fetch_app_json(endpoint: str, app_id: str):
-    key = endpoint.format(app_id)
-    if app_id in _app_json_cache:
-        return _app_json_cache[app_id]
+REQUEST_TIMEOUT = 30
+SLEEP_SECONDS = 2.0
+JITTER_SECONDS = 0.5
+
+HEADERS = {
+    "User-Agent": "steam-reviews-summary-scraper/1.1 (macOS; summary-only)"
+}
+
+def log_fail(msg: str):
+    os.makedirs(OUT_DIR, exist_ok=True)
+    with open(FAILED_LOG, "a", encoding="utf-8") as f:
+        f.write(f"{datetime.now(timezone.utc).isoformat()}Z\t{msg}\n")
+
+def safe_get(url, params=None):
     try:
-        response = requests.get(key)
-        response.raise_for_status()
-        data = response.json()
-        _app_json_cache[app_id] = data
-        return data
-    except requests.exceptions.RequestException as e:
-        print(f"Request failed: {e}")
-        return None
-
-# --------------------------------------------------------------------------- Game List ---------------------------------------------------------------------------
-# Used to get the steam game list from the API connection
-def get_steam_game_list(api_key: str, cache_file: str = "Scrapers/games-list.csv"):
-    # Check cache file first
-    if os.path.exists(cache_file):
-        try:
-            return pd.read_csv(cache_file)
-        except Exception as e:
-            print(f"Failed to read cache file {cache_file}: {e}")
-    
-    # Cache miss or unreadable; fetch from API
-    params = {"key": api_key}
-    try:
-        response = requests.get(GAME_LIST_ENDPOINT, params=params)
-        response.raise_for_status()
-        data = response.json()
-        appids, names, last_mods, price_changes = [], [], [], []
-        for i in data["response"]["apps"]:
-            appids.append(i["appid"])
-            names.append(i["name"])
-            last_mods.append(i["last_modified"])
-            price_changes.append(i["price_change_number"])
-        df = pd.DataFrame({
-            "appid": appids,
-            "name": names,
-            "last_modified": last_mods,
-            "price_change_number": price_changes,
-        })
-        # Save to cache for future runs
-        os.makedirs(os.path.dirname(cache_file), exist_ok=True)
-        df.to_csv(cache_file, index=False)
-        return df
-    except requests.exceptions.RequestException as e:
-        print(f"Request failed: {e}")
-        return None
-
-
-# --------------------------------------------------------------------------- Reviews Summary data ---------------------------------------------------------------------------
-
-# Create Tags class
-@dataclass
-class ReviewSummary(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    
-    num_reviews: int = 0
-    review_score: int = 0
-    review_score_desc: str
-    total_positive: int
-    total_negative: int
-    total_reviews: int
-    collection_date: datetime = datetime.now()
-
-# Function to get a review summary of each app ID
-def get_reviews_summary(endpoint, app_id: str):
-    try:
-        reviews_sum_data = fetch_app_json(endpoint, app_id)
-        if reviews_sum_data is None:
-            return None
-        # Reviews endpoint returns flat JSON
-        reviews_data = reviews_sum_data
-        if reviews_data and reviews_data.get("success") and "query_summary" in reviews_data:
-            summary = reviews_data["query_summary"]
-            reviews = ReviewSummary.model_validate(summary)
-        else:
-            print(f"No data found for app_id {app_id}")
-            return None
-        return pd.DataFrame([{
-            "steam_appid": app_id,
-            "num_reviews": reviews.num_reviews,
-            "review_score": reviews.review_score,
-            "review_score_desc": reviews.review_score_desc,
-            "total_positive": reviews.total_positive,
-            "total_negative": reviews.total_negative,
-            "total_reviews": reviews.total_reviews,
-            "collection_date": datetime.now(),
-        }])
+        r = requests.get(url, params=params, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+        r.raise_for_status()
+        return r
     except Exception as e:
-        print(f"Error parsing reviews for {app_id}: {e}")
+        log_fail(f"GET failed url={url} params={params} err={repr(e)}")
         return None
+
+def fetch_all_app_list(api_key: str, max_results: int = 50000) -> pd.DataFrame:
+    """
+    Pages through IStoreService/GetAppList using last_appid.
+    Returns a DataFrame with at least: appid, name, last_modified, price_change_number.
+    """
+    if not APP_ID_LIST_ENDPOINT:
+        raise ValueError("APP_ID_LIST_ENDPOINT missing in config.env")
+    if not api_key:
+        raise ValueError("API_KEY missing in config.env")
+
+    rows = []
+    last_appid = 0
+
+    while True:
+        params = {
+            "key": api_key,
+            "last_appid": last_appid,
+            "max_results": max_results,
+        }
+        resp = safe_get(APP_ID_LIST_ENDPOINT, params=params)
+        if resp is None:
+            break
+
+        data = resp.json()
+        apps = (data.get("response") or {}).get("apps") or []
+        if not apps:
+            break
+
+        for a in apps:
+            rows.append({
+                "appid": a.get("appid"),
+                "name": a.get("name"),
+                "last_modified": a.get("last_modified"),
+                "price_change_number": a.get("price_change_number"),
+            })
+
+        last_appid = apps[-1].get("appid", last_appid)
+        time.sleep(0.2)
+
+    df = pd.DataFrame(rows).dropna(subset=["appid"])
+    df["appid"] = df["appid"].astype(int)
+    return df
+
+def load_or_build_app_list() -> pd.DataFrame:
+    if os.path.exists(GAMES_LIST_CACHE):
+        try:
+            df = pd.read_csv(GAMES_LIST_CACHE)
+            if "appid" in df.columns:
+                df["appid"] = df["appid"].astype(int)
+                return df
+        except Exception as e:
+            log_fail(f"Failed to read cache {GAMES_LIST_CACHE}: {repr(e)}")
+
+    df = fetch_all_app_list(API_KEY)
+    os.makedirs(os.path.dirname(GAMES_LIST_CACHE), exist_ok=True)
+    df.to_csv(GAMES_LIST_CACHE, index=False)
+    return df
+
+def is_game_app(appid: int, cc: str = "us") -> bool:
+    """
+    Uses store appdetails to determine type == 'game' (filters out DLC/software/etc).
+    """
+    if not APP_DETAILS_ENDPOINT:
+        raise ValueError("APP_DETAILS_ENDPOINT missing in config.env")
+
+    params = {"appids": str(appid), "cc": cc}
+    resp = safe_get(APP_DETAILS_ENDPOINT, params=params)
+    if resp is None:
+        return False
+
+    try:
+        payload = resp.json()
+        entry = payload.get(str(appid), {})
+        if not entry.get("success"):
+            return False
+        data = entry.get("data") or {}
+        return data.get("type") == "game"
+    except Exception as e:
+        log_fail(f"appdetails parse failed appid={appid} err={repr(e)}")
+        return False
+
+def fetch_review_summary(appid: int, name: str = None, language: str = "all"):
+    """
+    Calls store appreviews with filter=summary and num_per_page=0, reads query_summary.
+    """
+    if not APP_REVIEWS_ENDPOINT:
+        raise ValueError("APP_REVIEWS_ENDPOINT missing in config.env")
+
+    url = APP_REVIEWS_ENDPOINT.format(appid)
+    params = {
+        "json": 1,
+        "filter": "summary",
+        "language": language,
+        "num_per_page": 0,
+    }
+    resp = safe_get(url, params=params)
+    if resp is None:
+        return None
+
+    try:
+        data = resp.json()
+        if not data.get("success"):
+            return None
+        qs = data.get("query_summary") or {}
+        return {
+            "steam_appid": appid,
+            "name": name,
+            "num_reviews": qs.get("num_reviews"),
+            "review_score": qs.get("review_score"),
+            "review_score_desc": qs.get("review_score_desc"),
+            "total_positive": qs.get("total_positive"),
+            "total_negative": qs.get("total_negative"),
+            "total_reviews": qs.get("total_reviews"),
+            "collection_date_utc": datetime.now(timezone.utc).isoformat(),
+        }
+    except Exception as e:
+        log_fail(f"appreviews parse failed appid={appid} err={repr(e)}")
+        return None
+
+def load_processed_appids(csv_path: str):
+    """
+    Resumes by skipping any steam_appid already written to REVIEWS_SUMMARY_CSV.
+    """
+    if not os.path.exists(csv_path):
+        return set()
+    try:
+        df = pd.read_csv(csv_path, usecols=["steam_appid"])
+        return set(df["steam_appid"].astype(int).tolist())
+    except Exception as e:
+        log_fail(f"Failed to read processed set from {csv_path}: {repr(e)}")
+        return set()
+
+def append_row(csv_path: str, row: dict):
+    os.makedirs(os.path.dirname(csv_path), exist_ok=True)
+    df = pd.DataFrame([row])
+    write_header = not os.path.exists(csv_path)
+    df.to_csv(csv_path, mode="a", header=write_header, index=False)
 
 def main():
-    # Get game list (reads from cache if exists, fetches API only on cache miss)
-    games_list = get_steam_game_list(API_KEY, "Scrapers/games-list.csv")
-    if games_list is not None:
-        appids = games_list["appid"].tolist()
-    else:
-        print("Unable to obtain app IDs")
-        return
+    apps = load_or_build_app_list()
+    apps["appid"] = apps["appid"].astype(int)
 
-    # For each app id, run each scraper once (in tandem)
-    scrapers = [
-        ("reviews_sum", get_reviews_summary, "Scrapers/steam_data_reviews/reviews_summary_data.csv")
-    ]
+    # AppID -> name mapping
+    appid_to_name = dict(zip(apps["appid"], apps.get("name", pd.Series([None] * len(apps)))))
 
-    # Prepare processed-id sets per scraper for resumability
-    processed = {}
-    for name, _func, out_file in scrapers:
-        os.makedirs(os.path.dirname(out_file), exist_ok=True)
-        if os.path.exists(out_file):
-            try:
-                existing = pd.read_csv(out_file)
-                processed[name] = set(existing["steam_appid"].astype(str))
-            except Exception:
-                processed[name] = set()
-        else:
-            processed[name] = set()
+    appids = apps["appid"].dropna().astype(int).tolist()
+    processed = load_processed_appids(REVIEWS_SUMMARY_CSV)
+    remaining = [a for a in appids if a not in processed]
 
-    # Get set of already-processed app IDs from the first scraper (details)
-    first_scraper_name = scrapers[0][0] if scrapers else None
-    already_processed = processed.get(first_scraper_name, set())
-    
-    # Filter appids to only those not yet processed; resume where scraper left off
-    unprocessed_appids = [str(app_id) for app_id in appids if str(app_id) not in already_processed]
-    print(f"Resuming from app ID index (already processed: {len(already_processed)}, remaining: {len(unprocessed_appids)})")
+    print(f"Total appids: {len(appids)} | Already processed: {len(processed)} | Remaining: {len(remaining)}")
 
-    # For each app id, call each scraper once (skip if already processed)
-    for sid in unprocessed_appids:
-        # Rate limiting
-        time.sleep(1.5)
-        for name, _func, out_file in scrapers:
-            if sid in processed.get(name, set()):
-                continue
+    for idx, appid in enumerate(remaining, start=1):
+        time.sleep(SLEEP_SECONDS + random.random() * JITTER_SECONDS)
 
-            try:
-                df = _func(REVIEWS_ENDPOINT, sid)
-            except Exception as e:
-                print(f"Error running {name} for {sid}: {e}")
-                df = None
+        # Only keep actual games
+        if not is_game_app(appid):
+            continue
 
-            if df is not None and not df.empty:
-                df.to_csv(out_file, mode="a", header=not os.path.exists(out_file), index=False)
-                processed[name].add(sid)
-                print(f"{sid} {name} processed")
+        summary = fetch_review_summary(appid, name=appid_to_name.get(appid))
+        if summary is None:
+            continue
 
-        if sid in _app_json_cache:
-            _app_json_cache.pop(sid)
-            print(_app_json_cache)
+        append_row(REVIEWS_SUMMARY_CSV, summary)
+        print(f"WROTE {appid} {summary.get('name')} total_reviews={summary.get('total_reviews')}")
 
-    print("All scrapers finished.")
+        if idx % 250 == 0:
+            print(f"Progress: looped {idx}/{len(remaining)} remaining appids")
 
+    print("Done. Output:", REVIEWS_SUMMARY_CSV)
 
 if __name__ == "__main__":
     main()
