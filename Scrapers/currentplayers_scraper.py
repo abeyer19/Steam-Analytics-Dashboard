@@ -15,7 +15,7 @@ from pydantic import BaseModel, ConfigDict
 load_dotenv("config.env")
 API_KEY = os.getenv("API_KEY")
 GAME_LIST_ENDPOINT = os.getenv("APP_ID_LIST_ENDPOINT")
-PlAYER_COUNT_ENDPOINT = os.getenv("PLAYER_COUNT_ENDPOINT")
+PLAYER_COUNT_ENDPOINT = os.getenv("PLAYER_COUNT_ENDPOINT")
 
 # --------------------------------------------------------------------------- Helpers ---------------------------------------------------------------------------
 # In-memory cache for fetched app JSON responses, limiting repeats for each get function
