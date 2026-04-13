@@ -1,4 +1,4 @@
-# DVA-Project
+# Steam Analytics Dashboard
 Repository for DVA Project SP26 Team 40
 
 # ℹ️ Description
