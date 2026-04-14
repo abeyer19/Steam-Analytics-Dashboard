@@ -2,7 +2,7 @@
 Repository for Georgia Tech's CSE 6242 DVA Project - Spring 2026 Team 40
 
 # ℹ️ Description
-This project is a part of a semester long team collaboration effort for Georgia Tech's CSE6242 course in the OMSA program, Spring semester 2026.
+This project is a part of a semester long team collaboration effort for Georgia Tech's CSE 6242 course in the OMSA program, Spring semester 2026.
 
 Our mission is to empower developers, game studios, and researchers on the world’s largest gaming platform by bridging the gap between academic research and actionable analytics through an intuitive, interactive dashboard.
 
