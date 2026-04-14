@@ -58,12 +58,10 @@ def limit_and_pivot(df: pd.DataFrame, col_name, top_n = None) -> pd.DataFrame:
     df_filtered = df.copy()
     if top_n:
         top_v = df[col_name].value_counts().nlargest(top_n).index
-        df_filtered[col_name] = df_filtered[col_name].where(df_filtered[col_name].isin(top_v), 'Other')
-        dummies = pd.get_dummies(df_filtered, columns=[col_name], dtype=int)
-        return dummies.groupby('steam_appid').max()
-    else:
-        dummies = pd.get_dummies(df_filtered, columns=[col_name], dtype=int)
-        return dummies.groupby('steam_appid').max()
+        df_filtered.loc[~df_filtered[col_name].isin(top_v), col_name] = 'Other'
+    
+    dummies = pd.get_dummies(df_filtered, columns=[col_name], dtype=int, drop_first=True)
+    return dummies.groupby('steam_appid').max()
 
 details_data = limit_and_pivot(details_data, 'controller_support')
 reviews_data = limit_and_pivot(reviews_data, 'review_score')
