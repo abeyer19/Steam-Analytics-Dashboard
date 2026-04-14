@@ -56,7 +56,7 @@ cor_pairs <- as.data.frame(as.table(cor_matrix))
 high_cor <- subset(cor_pairs, Freq > 0.75 & as.character(Var1) < as.character(Var2))
 high_cor <- high_cor[order(-high_cor$Freq), ]
 colnames(high_cor) <- c("Variable_1", "Variable_2", "Correlation")
-high_cor
+datatable(high_cor, options = list(scrollX = TRUE, pageLength = 15), filter = 'top')
 
 
 # 6. Remove high VIF variables from master_data
@@ -72,3 +72,4 @@ coefs <- stack(coef(model_log_vif))
 coefs <- coefs[, c("ind", "values")]
 coefs
 #write.csv(coefs, "DVA-Project/Algorithms/model_coefficients.csv", row.names = FALSE)
+
