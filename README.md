@@ -1,5 +1,5 @@
 # Steam Analytics Dashboard
-Repository for DVA Project SP26 Team 40
+Repository for Georgia Tech's CSE 6242 DVA Project - Spring 2026 Team 40
 
 # ℹ️ Description
 This project is a part of a semester long team collaboration effort for Georgia Tech's CSE6242 course in the OMSA program, Spring semester 2026.
