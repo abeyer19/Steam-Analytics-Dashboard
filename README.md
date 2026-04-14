@@ -11,6 +11,7 @@ Using free and open-source software, we are able to collect mass amounts of data
 # 💾 Installation
 ### 0. Prerequesites
 - Python 3.14+ required.
+- R version 4.5.2+ required.
 - CLI (*Command Line Iterface*)
 
 ### 1. Cloning the repository
