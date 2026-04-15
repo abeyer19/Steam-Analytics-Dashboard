@@ -24,7 +24,7 @@ Once cloned, either open the cloned repo in your IDE of choice or change directo
 
 **It is highly recommended that you create a virtual environment prior to downloading dependencies.**
 
-#### Install Dependencies:
+#### Install Dependencies (Python):
 > a. Install dependencies **without** the ability to make changes to current code.
 ```Bash
 python3 -m pip install .
@@ -33,6 +33,12 @@ python3 -m pip install .
 ```Bash
 python3 -m pip install -e .
 ```
+
+#### Install Dependencies (R):
+> a. Install dependencies within the CLI.
+
+> b. Install dependencies within the R console for RStudio.
+
 
 # 🚀 Execution
 ### 0. Code Demo's
