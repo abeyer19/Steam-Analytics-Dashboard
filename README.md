@@ -28,7 +28,7 @@ python3 -m venv .venv
 source .venv/bin/activate # On Windows: .venv\Scripts\activate
 ```
 
-#### Install Dependencies:
+#### Install Dependencies (Python):
 > a. Install dependencies **without** the ability to make changes to current code.
 ```Bash
 python3 -m pip install .
