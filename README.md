@@ -17,7 +17,7 @@ Using free and open-source software, we are able to collect mass amounts of data
 ### 1. Cloning the repository
 #### Clone Repository:
 ```Bash
-git clone https://github.com/USER/DVA-Project
+git clone https://github.com/USER/Steam-Analytics-Dashboard
 ```
 \
 Once cloned, either open the cloned repo in your IDE of choice or change directories to the respective path in your CLI and download depedencies.
