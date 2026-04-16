@@ -36,9 +36,13 @@ python3 -m pip install -e .
 
 #### Install Dependencies (R):
 > a. Install dependencies within the CLI.
-
+```Bash
+Rscript -e "renv::restore()"
+```
 > b. Install dependencies within the R console for RStudio.
-
+```R
+renv::restore()
+```
 
 # 🚀 Execution
 ### 0. Code Demo's
