@@ -22,9 +22,13 @@ git clone https://github.com/USER/Steam-Analytics-Dashboard
 \
 Once cloned, either open the cloned repo in your IDE of choice or change directories to the respective path in your CLI and download depedencies.
 
-**It is highly recommended that you create a virtual environment prior to downloading dependencies.**
+**It is highly recommended that you create a virtual environment prior to downloading dependencies with the following CLI commands.**
+```Bash
+python3 -m venv .venv
+source .venv/bin/activate # On Windows: .venv\Scripts\activate
+```
 
-#### Install Dependencies (Python):
+#### Install Dependencies:
 > a. Install dependencies **without** the ability to make changes to current code.
 ```Bash
 python3 -m pip install .
