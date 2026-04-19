@@ -71,5 +71,9 @@ summary(model_log_vif)
 coefs <- stack(coef(model_log_vif))
 coefs <- coefs[, c("ind", "values")]
 coefs
-#write.csv(coefs, "DVA-Project/Algorithms/model_coefficients.csv", row.names = FALSE)
+write.csv(coefs, "DVA-Project/Algorithms/model_coefficients.csv", row.names = FALSE)
 
+vif_vals2 <- vif(model_log_vif)
+vif_matrix2 <- data.frame(Variable = names(vif_vals2), VIF_Score = as.numeric(vif_vals2))
+colnames(vif_matrix2) <- c("Variable_Name", "VIF_Score")
+datatable(vif_matrix2, options = list(order = list(list(2, 'desc')), pageLength = 15))
