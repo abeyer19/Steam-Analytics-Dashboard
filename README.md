@@ -19,16 +19,16 @@ This project serves as a comprehensive analytics solution developed during the S
 ```mermaid
 graph TD
     %% Node Definitions
-    A([Steam Web API])
-    B([Steam HTML])
-    C([JSON Endpoints])
-    D[Python Scrapers]
-    E[Pydantic Validation]
-    F[(Raw Data Store)]
-    G[Revenue Calculations]
-    H[Master Table Aggregation]
-    I[R Statistical Modeling]
-    J[Tableau Dashboard]
+    A([Steam Web API<br/><br/>])
+    B([Steam HTML<br/><br/>])
+    C([JSON Endpoints<br/><br/>])
+    D[Python Scrapers<br/><br/>]
+    E[Pydantic Validation<br/><br/>]
+    F[(Raw Data Store<br/><br/>)]
+    G[Revenue Calculations<br/><br/>]
+    H[Master Table Aggregation<br/><br/>]
+    I[R Statistical Modeling<br/><br/>]
+    J[Tableau Dashboard<br/><br/>]
 
     %% Connections
     A & B & C --> D
