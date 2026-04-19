@@ -102,7 +102,7 @@ python3 -m Scrapers.achievements_scraper
 
 ### 2. Data Transformations and Algorithms
 #### Revenue Estimations
-Calculates revenue using the **Boxleiter Method**, using the following logic: \
+Calculates revenue using the **Boxleiter Method**, using the following logic:
 
 $$
 \text{Revenue} \approx (\text{Reviews} \times \text{Multiplier}) \times \text{Price}
