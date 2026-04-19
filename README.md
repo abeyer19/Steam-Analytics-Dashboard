@@ -75,3 +75,6 @@ These residual scripts include: ```appreviews_scraper.py```, ```currentplayers_s
 ### 1. Algorithm Implementations
 
 ### 2. Dashboard Demo's
+
+https://github.com/user-attachments/assets/91a8f584-6fbd-4871-b428-ced9edda9712
+
