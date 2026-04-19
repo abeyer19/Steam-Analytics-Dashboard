@@ -6,7 +6,7 @@ This project is a part of a semester long team collaboration effort for Georgia 
 
 Our mission is to empower developers, game studios, and researchers on the world’s largest gaming platform by bridging the gap between academic research and actionable analytics through an intuitive, interactive dashboard.
 
-Using free and open-source software, we are able to collect mass amounts of data using [Steam](https://store.steampowered.com/) storefront endpoints and official APIs about the platforms 200K+ App IDs and 100K+ Games. All data collection, tranformations, algorithmic implementations, and visualizations are engineered and maintained by our team while ensuring reproducibility.
+Using free and open-source software, we are able to collect mass amounts of data using [Steam](https://store.steampowered.com/) storefront endpoints and official APIs about the platforms 200K+ App IDs and 100K+ Games. All data collection, transformations, algorithmic implementations, and visualizations are engineered and maintained by our team while ensuring reproducibility.
 
 # 💾 Installation
 ### 0. Prerequesites
