@@ -18,21 +18,27 @@ This project serves as a comprehensive analytics solution developed during the S
 # 🏗️ Data Architecture
 ```mermaid
 graph TD
-    A([Steam Web API])
-    B([Steam HTML])
-    C([JSON Endpoints])
+    %% Sources
+    A([&nbsp;Steam Web API&nbsp;])
+    B([&nbsp;Steam HTML&nbsp;])
+    C([&nbsp;JSON Endpoints&nbsp;])
 
+    %% Extraction
     D[Python Scrapers]
-    E{Pydantic Validation}
+    E{&nbsp;Pydantic<br/>Validation&nbsp;}
 
-    F[(Raw Data Store)]
+    %% Storage
+    F[(&nbsp;Raw Data Store&nbsp;)]
 
-    G[Revenue Calculations]
-    H[Master Table Aggregation]
+    %% Transformation
+    G[&nbsp;Revenue Calculations&nbsp;]
+    H[&nbsp;Master Table Aggregation&nbsp;]
 
-    I[R Statistical Modeling]
-    J[Tableau Dashboard]
+    %% Analysis
+    I[&nbsp;R Statistical Modeling&nbsp;]
+    J[&nbsp;Tableau Dashboard&nbsp;]
 
+    %% Connections
     A & B & C --> D
     D --> E
     E -- Pass --> F
