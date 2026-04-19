@@ -16,36 +16,7 @@ This project serves as a comprehensive analytics solution developed during the S
 - **End-to-End Integrity:** Utilizes Pydantic for schema validation and type uniformity while ensuring full reproducibility across all collection, transformation, and visualization layers.
 
 # 🏗️ Data Architecture
-```mermaid
-graph TD
-    %% Sources
-    A([&nbsp;Steam Web API&nbsp;])
-    B([&nbsp;Steam HTML&nbsp;])
-    C([&nbsp;JSON Endpoints&nbsp;])
-
-    %% Extraction
-    D[Python Scrapers]
-    E{&nbsp;Pydantic<br/>Validation&nbsp;}
-
-    %% Storage
-    F[(&nbsp;Raw Data Store&nbsp;)]
-
-    %% Transformation
-    G[&nbsp;Revenue Calculations&nbsp;]
-    H[&nbsp;Master Table Aggregation&nbsp;]
-
-    %% Analysis
-    I[&nbsp;R Statistical Modeling&nbsp;]
-    J[&nbsp;Tableau Dashboard&nbsp;]
-
-    %% Connections
-    A & B & C --> D
-    D --> E
-    E -- Pass --> F
-    F --> G --> H
-    H --> I & J
-    I --> J
-```
+<img width="2868" height="1730" alt="Online FlowChart   Diagrams Editor - Mermaid Live Editor" src="https://github.com/user-attachments/assets/601283ef-9470-4267-811e-70e4f1bc2f81" />
 
 # 🛠️ Tech Stack
 - **Languages:** Python (Scraping & ETL), R (Statistical Modeling)
