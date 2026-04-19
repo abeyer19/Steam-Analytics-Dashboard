@@ -7,7 +7,7 @@ This project serves as a comprehensive analytics solution developed during the S
 **Our mission:** to empower indie developers, small game studios, and researchers on the world’s largest gaming platform by bridging the gap between academic research and actionable analytics through an intuitive and interactive dashboard.
 
 **Key Features:**
-- **Mass & Resilient Data Ingestion:** Engineered to collect data from the official [Steamworks Web API](https://steamcommunity.com/dev), internal JSON endpoints, and raw HTML scraping from the [Steam website](https://store.steampowered.com/) while managing rate limits and connection stability..
+- **Mass & Resilient Data Ingestion:** Engineered to collect data from the official [Steamworks Web API](https://steamcommunity.com/dev), internal JSON endpoints, and raw HTML scraping from the [Steam website](https://store.steampowered.com/) while managing rate limits and connection stability.
 
 - **Scale:** Manages metadata and complex schemas for 200K+ App IDs and 100K+ Games.
 
