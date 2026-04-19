@@ -18,22 +18,20 @@ This project serves as a comprehensive analytics solution developed during the S
 # 🏗️ Data Architecture
 ```mermaid
 graph TD
-    %% Define a standard style to force width and padding
-    classDef githubStyle padding:15px,min-width:150px;
-
     A([Steam Web API])
     B([Steam HTML])
     C([JSON Endpoints])
-    D[Python Scrapers]
-    E{Pydantic Validation}
-    F[(Raw Data Store)]
-    G[Revenue Calculations]
-    H[Master Table Aggregation]
-    I[R Statistical Modeling]
-    J[Tableau Dashboard]
 
-    %% Apply the style to the problematic boxes
-    class A,B,C,D,E,F,G,H,I,J githubStyle;
+    D[Python Scrapers]
+    E{Pydantic<br/>Validation}
+
+    F[(Raw Data Store)]
+
+    G[Revenue<br/>Calculations]
+    H[Master Table<br/>Aggregation]
+
+    I[R Statistical<br/>Modeling]
+    J[Tableau Dashboard]
 
     A & B & C --> D
     D --> E
