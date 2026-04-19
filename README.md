@@ -1,116 +1,124 @@
 # Steam Analytics Dashboard
-Repository for Georgia Tech's CSE 6242 DVA Project - Spring 2026 Team 40
+**Repository for Georgia Tech's CSE 6242 DVA Project - Spring 2026 Team 40**
 
 # ℹ️ Description
-This project is a part of a semester long team collaboration effort for Georgia Tech's CSE 6242 course in the OMSA program, Spring semester 2026.
+This project serves as a comprehensive analytics solution developed during the Spring 2026 semester for Georgia Tech’s CSE 6242 (Data and Visual Analytics).
 
-Our mission is to empower developers, game studios, and researchers on the world’s largest gaming platform by bridging the gap between academic research and actionable analytics through an intuitive, interactive dashboard.
+**Our mission:** to empower indie developers, small game studios, and researchers on the world’s largest gaming platform by bridging the gap between academic research and actionable analytics through an intuitive and interactive dashboard.
 
-Using free and open-source software, we are able to collect mass amounts of data using [Steam](https://store.steampowered.com/) storefront endpoints and official APIs about the platforms 200K+ App IDs and 100K+ Games. All data collection, transformations, algorithmic implementations, and visualizations are engineered and maintained by our team while ensuring reproducibility.
+**Key Features:**
+- **Mass & Resilient Data Ingestion:** Engineered to collect data from the official [Steamworks Web API](https://steamcommunity.com/dev), internal JSON endpoints, and raw HTML scraping from the [Steam website](https://store.steampowered.com/) while managing rate limits and connection stability..
+
+- **Scale:** Manages metadata and complex schemas for 200K+ App IDs and 100K+ Games.
+
+- **Advanced Modeling:** Implements the Boxleiter Method for revenue estimation and Linear Regression for sales prediction.
+
+- **End-to-End Integrity:** Utilizes Pydantic for schema validation and type uniformity while ensuring full reproducibility across all collection, transformation, and visualization layers.
+
+# 🏗️ Data Architecture
+```mermaid
+graph TD
+    A([Steam Web API])
+    B([Steam HTML])
+    C([JSON Endpoints])
+
+    D[Python Scrapers]
+    E{Pydantic Validation}
+
+    F[(Raw Data Store)]
+
+    G[Revenue Calculations]
+    H[Master Table Aggregation]
+
+    I[R Statistical Modeling]
+    J[Tableau Dashboard]
+
+    A & B & C --> D
+    D --> E
+    E -- Pass --> F
+    F --> G --> H
+    H --> I & J
+    I --> J
+```
+
+# 🛠️ Tech Stack
+- **Languages:** Python (Scraping & ETL), R (Statistical Modeling)
+
+- **Data Handling:** Requests (HTTP Requests), BeautifulSoup (HTML Parsing), Pydantic (Schema Validation), Pandas (Data Manipulation)
+
+- **Visuals:** Tableau
+
+- **Environment:** venv, renv
 
 # 💾 Installation
 ### 0. Prerequisites
-- Python 3.14+ required.
-- R version 4.5.2+ required.
-- CLI (*Command Line Interface*)
+- Python 3.14+
+- R version 4.5.2+
+- CLI
 
-### 1. Cloning the repository
+### 1. Setup
 #### Clone Repository:
 ```Bash
 git clone https://github.com/USER/Steam-Analytics-Dashboard
+cd Steam-Analytics-Dashboard
 ```
 
-Once cloned, either open the cloned repo in your IDE of choice or change directories to the respective path in your CLI and continue to [installing dependencies](#installingd-dependencies).
-
-**It is highly recommended that you create a virtual environment prior to downloading dependencies with the following CLI commands.**
+#### Environment Configuration:
+Creating a virtual environment is highly recommended to manage dependencies:
 ```Bash
 python3 -m venv .venv
 source .venv/bin/activate # On Windows: .venv\Scripts\activate
 ```
 
 ### 2. Installing Dependencies
-#### Install Dependencies (Python):
-> a. Install dependencies **without** the ability to make changes to current code.
-```Bash
-python3 -m pip install .
-```
-> b. Install dependencies in editable mode **for development**.
-```Bash
-python3 -m pip install -e .
-```
+#### Python:
+- Production: ```python3 -m pip install .```
+- Development: ```python3 -m pip install -e .```
 
-#### Install Dependencies (R):
-> a. Install dependencies within the CLI.
-```Bash
-Rscript -e "renv::restore()"
-```
-> b. Install dependencies within the R console for RStudio.
-```R
-renv::restore()
-```
+#### R:
+- CLI: ```Rscript -e "renv::restore()"```
+- RStudio: ```R renv::restore()```
 
-### 3. Obtaining a Steam Web API Key
-Follow the instruction from the [Steam Web API Documentation](https://steamcommunity.com/dev) to obtain an API Key prior to running any scripts. 
-\
-Once completed, open the ```config.env``` file from the downloaded Repository and replace ```YOUR API KEY HERE```, in line one, with your newly obtained Steam Web API Key. 
+### 3. API Configuration
+- Obtain a key from the [Steam Web API Documentation](https://steamcommunity.com/dev).
+- Open the ```config.env``` and update the ```API_KEY``` field.
 
 # 🚀 Execution
-### 0. Code Demo's
-#### Initial Start
-We recommend starting with ```appdetails_scraper.py```, as this will pull a majority of the metadata for all App IDs. \
-**Please Note:** each script may take a few days to complete given the size of data being scraped, your network connection, your computers hardware capabilities, and the rate limiting put in place by our team. This rate limiting is for your protection, please do not adjust or remove from the scripts.
+### 0. Data Ingestion (Scrapers)
+We recommend starting with the metadata scraper, as it populates the core App ID registry.
 
-> a. CLI
+> **Note:** Due to rate-limiting and dataset size, these scripts may require several days for a full refresh.
+
 ```Bash
-python3 -m Scrapers.appdetails_scraper.py
-```
-> b. IDE 
-```
-Run Python script.
+# Core metadata ingestion
+python3 -m Scrapers.appdetails_scraper
+
+# Supporting data streams
+python3 -m Scrapers.appreviews_scraper
+python3 -m Scrapers.currentplayers_scraper
+python3 -m Scrapers.tags_scraper
+python3 -m Scrapers.achievements_scraper
 ```
 
-#### Continued data scraping
-Once   ```appdetails_scraper.py``` is completed, continue with other scripts until all have finished. \
-These residual scripts include: ```appreviews_scraper.py```, ```currentplayers_scraper.py```, ```tags_scraper.py```, and ```achievements_scraper.py```
-
-### 1. Algorithm Implementations
-#### Revenue Calculations
-Once all scraping scripts have been completed, calculate the revenue using the The Boxleiter Method by running 'revenue.py'. 
-> a. CLI
+### 2. Data Transformations and Algorithms
+#### Revenue Estimations
+Calculates revenue using the **Boxleiter Method**, using the following logic: \
+$$
+\text{Revenue} \approx (\text{Reviews} \times \text{Multiplier}) \times \text{Price}
+$$
 ```Bash
-python3 -m Transformers.revenue.py
-```
-> b. IDE 
-```
-Run Python script.
+python3 -m Transformers.revenue
 ```
 
-#### Master Data Table Aggregations
-Next, run 'master.py' for the master data table used in the Linear Regression model. \
-This script is used to one-hot encode categorical variables and limit the number of these by taking the top *N* by unique count to reduce overfitting the model.
-> a. CLI
+#### Feature Engineering & Modeling
+Aggregates the master data table, performs one-hot encoding for categorical variables, and executes the regression model.
 ```Bash
-python3 -m Transformers.master.py
-```
-> b. IDE 
-```
-Run Python script.
-```
+# Data aggregation and encoding
+python3 -m Transformers.master
 
-#### Linear Regression Models
-Our Linear Regression model code underwent testing for intitial training, refactoring, and re-training after initial observations. \
-This code will reproduce the same outcome used in our dashboard but with the additions of the testing steps.
-
-> a. CLI
-```Bash
+# Train and test Linear Regression models
 Rscript Algorithms/units_regression.R
 ```
-> b. RStudio
-```
-Run R script.
-```
 
-Once this was completed, we took all the raw data that collected, transformed, and trained to create the user dashboard.
-
-### 2. Dashboard Demo's
+# 📊 Dashboard Demo
 https://github.com/user-attachments/assets/3fda41e6-61f5-406a-b0e1-0025d5b01a8d
