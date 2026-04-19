@@ -9,10 +9,10 @@ Our mission is to empower developers, game studios, and researchers on the world
 Using free and open-source software, we are able to collect mass amounts of data using [Steam](https://store.steampowered.com/) storefront endpoints and official APIs about the platforms 200K+ App IDs and 100K+ Games. All data collection, transformations, algorithmic implementations, and visualizations are engineered and maintained by our team while ensuring reproducibility.
 
 # 💾 Installation
-### 0. Prerequesites
+### 0. Prerequisites
 - Python 3.14+ required.
 - R version 4.5.2+ required.
-- CLI (*Command Line Iterface*)
+- CLI (*Command Line Interface*)
 
 ### 1. Cloning the repository
 #### Clone Repository:
@@ -58,7 +58,7 @@ Once completed, open the ```config.env``` file from the downloaded Repository an
 ### 0. Code Demo's
 #### Initial Start
 We recommend starting with ```appdetails_scraper.py```, as this will pull a majority of the metadata for all App IDs. \
-**Please Note: each script may take a few days to complete given the size of data being scraped, your network connection, your computers hardware capabilities, and the rate limiting put in place by our team. This rate limiting is for your protecion, please do not adjust or remove from the scripts.**
+**Please Note: each script may take a few days to complete given the size of data being scraped, your network connection, your computers hardware capabilities, and the rate limiting put in place by our team. This rate limiting is for your protection, please do not adjust or remove from the scripts.**
 
 > a. CLI
 ```Bash
