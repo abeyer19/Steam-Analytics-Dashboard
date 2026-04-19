@@ -74,8 +74,19 @@ Once   ```appdetails_scraper.py``` is completed, continue with other scripts unt
 These residual scripts include: ```appreviews_scraper.py```, ```currentplayers_scraper.py```, ```tags_scraper.py```, and ```achievements_scraper.py```
 
 ### 1. Algorithm Implementations
+#### Revenue Calculations
+Once all scraping scripts have been completed, calculate the revenue using the The Boxleiter Method by running 'revenue.py'. 
+> a. CLI
+```Bash
+python3 -m Transformers.revenue.py
+```
+> b. IDE 
+```
+Run Python script.
+```
+
 #### Master Data Table Aggregations
-Once all scraping scripts have been completed, run 'master.py' for the master data table used in the Linear Regression model. \
+Next, run 'master.py' for the master data table used in the Linear Regression model. \
 This script is used to one-hot encode categorical variables and limit the number of these by taking the top *N* by unique count to reduce overfitting the model.
 > a. CLI
 ```Bash
