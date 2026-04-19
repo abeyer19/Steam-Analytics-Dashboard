@@ -58,7 +58,7 @@ Once completed, open the ```config.env``` file from the downloaded Repository an
 ### 0. Code Demo's
 #### Initial Start
 We recommend starting with ```appdetails_scraper.py```, as this will pull a majority of the metadata for all App IDs. \
-**Please Note: each script may take a few days to complete given the size of data being scraped, your network connection, your computers hardware capabilities, and the rate limiting put in place by our team. This rate limiting is for your protection, please do not adjust or remove from the scripts.**
+**Please Note:** each script may take a few days to complete given the size of data being scraped, your network connection, your computers hardware capabilities, and the rate limiting put in place by our team. This rate limiting is for your protection, please do not adjust or remove from the scripts.
 
 > a. CLI
 ```Bash
@@ -69,10 +69,37 @@ python3 -m Scrapers.appdetails_scraper.py
 Run Python script.
 ```
 
+#### Continued data scraping
 Once   ```appdetails_scraper.py``` is completed, continue with other scripts until all have finished. \
 These residual scripts include: ```appreviews_scraper.py```, ```currentplayers_scraper.py```, ```tags_scraper.py```, and ```achievements_scraper.py```
 
 ### 1. Algorithm Implementations
+#### Master Data Table Aggregations
+Once all scraping scripts have been completed, run 'master.py' for the master data table used in the Linear Regression model. \
+This script is used to one-hot encode categorical variables and limit the number of these by taking the top *N* by unique count to reduce overfitting the model.
+> a. CLI
+```Bash
+python3 -m Transformers.master.py
+```
+> b. IDE 
+```
+Run Python script.
+```
+
+#### Linear Regression Models
+Our Linear Regression model code underwent testing for intitial training, refactoring, and re-training after initial observations. \
+This code will reproduce the same outcome used in our dashboard but with the additions of the testing steps.
+
+> a. CLI
+```Bash
+Rscript Algorithms/units_regression.R
+```
+> b. RStudio
+```
+Run R script.
+```
+
+Once this was completed, we took all the raw data that collected, transformed, and trained to create the user dashboard.
 
 ### 2. Dashboard Demo's
 https://github.com/user-attachments/assets/3fda41e6-61f5-406a-b0e1-0025d5b01a8d
