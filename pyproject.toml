@@ -23,4 +23,4 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project.urls]
-Respository = "https://github.com"
+Respository = "https://github.com/abeyer19/Steam-Analytics-Dashboard.git"
